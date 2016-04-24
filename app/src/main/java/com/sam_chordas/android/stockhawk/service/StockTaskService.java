@@ -3,13 +3,17 @@ package com.sam_chordas.android.stockhawk.service;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.OperationApplicationException;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.os.RemoteException;
+import android.preference.PreferenceManager;
+import android.support.annotation.IntDef;
 import android.util.Log;
 import com.google.android.gms.gcm.GcmNetworkManager;
 import com.google.android.gms.gcm.GcmTaskService;
 import com.google.android.gms.gcm.TaskParams;
+import com.sam_chordas.android.stockhawk.R;
 import com.sam_chordas.android.stockhawk.data.QuoteColumns;
 import com.sam_chordas.android.stockhawk.data.QuoteProvider;
 import com.sam_chordas.android.stockhawk.rest.Utils;
@@ -18,6 +22,8 @@ import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.net.URLEncoder;
 
 /**
@@ -26,6 +32,17 @@ import java.net.URLEncoder;
  * and is used for the initialization and adding task as well.
  */
 public class StockTaskService extends GcmTaskService{
+  @IntDef({Stock_STATUS_OK , Stock_STATUS_SERVER_DOWN ,Stock_STATUS_SERVER_INVALID,Stock_STATUS_UNKNOWN})
+  @Retention(RetentionPolicy.SOURCE)
+  public @interface ServerStatus {}
+
+  public static final int Stock_STATUS_OK = 0;
+  public static final int Stock_STATUS_SERVER_DOWN = 1;
+  public static final int Stock_STATUS_SERVER_INVALID = 2;
+  public static final int Stock_STATUS_UNKNOWN = 3;
+
+
+
   private String LOG_TAG = StockTaskService.class.getSimpleName();
 
   private OkHttpClient client = new OkHttpClient();
@@ -133,5 +150,12 @@ public class StockTaskService extends GcmTaskService{
 
     return result;
   }
+    private void setStockServerStatus(@ServerStatus int stockstatus)
+        {
+            SharedPreferences sp= PreferenceManager.getDefaultSharedPreferences(mContext);
+            SharedPreferences.Editor se=sp.edit();
+            se.putInt(mContext.getString(R.string.server_status),stockstatus);
+            se.commit();
+        }
 
 }
