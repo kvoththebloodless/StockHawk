@@ -2,11 +2,18 @@ package com.sam_chordas.android.stockhawk.rest;
 
 import android.content.ContentProviderOperation;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.preference.PreferenceManager;
 import android.util.Log;
+
+import com.sam_chordas.android.stockhawk.R;
 import com.sam_chordas.android.stockhawk.data.QuoteColumns;
 import com.sam_chordas.android.stockhawk.data.QuoteProvider;
+import com.sam_chordas.android.stockhawk.service.StockTaskService;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -21,13 +28,20 @@ public class Utils {
 
   public static boolean showPercent = true;
 
-  public static ArrayList quoteJsonToContentVals(String JSON){
+  public static ArrayList quoteJsonToContentVals(String JSON) throws JSONException,IOException{
     ArrayList<ContentProviderOperation> batchOperations = new ArrayList<>();
     JSONObject jsonObject = null;
     JSONArray resultsArray = null;
-    try{
+
       jsonObject = new JSONObject(JSON);
-      if (jsonObject != null && jsonObject.length() != 0){
+
+      if (jsonObject == null
+              || jsonObject.length() == 0) {
+          throw new IOException("length 0");// may look unnecessary, but I want this case to be handled just like the
+          // IOException in StockTaskService
+          //i.e, Server down
+      }
+      else{
         jsonObject = jsonObject.getJSONObject("query");
         int count = Integer.parseInt(jsonObject.getString("count"));
         if (count == 1){
@@ -45,9 +59,9 @@ public class Utils {
           }
         }
       }
-    } catch (JSONException e){
-      Log.e(LOG_TAG, "String to JSON failed: " + e);
-    }
+
+
+
     return batchOperations;
   }
 
@@ -83,6 +97,12 @@ public static boolean isConnected(Context mContext)
       return  isconnected;
 
   }
+
+    public static int getServerStatus(Context c)
+        {
+            SharedPreferences sp= PreferenceManager.getDefaultSharedPreferences(c);
+            return(sp.getInt(c.getString(R.string.server_status),StockTaskService.Stock_STATUS_UNKNOWN));
+        }
   public static ContentProviderOperation buildBatchOperation(JSONObject jsonObject){
     ContentProviderOperation.Builder builder = ContentProviderOperation.newInsert(
         QuoteProvider.Quotes.CONTENT_URI);
