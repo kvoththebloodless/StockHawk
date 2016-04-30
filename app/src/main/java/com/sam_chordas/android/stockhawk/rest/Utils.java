@@ -65,7 +65,7 @@ public class Utils {
     return batchOperations;
   }
 
-  public static String truncateBidPrice(String bidPrice){
+  public static String truncateBidPrice(String bidPrice)throws NumberFormatException{
     bidPrice = String.format("%.2f", Float.parseFloat(bidPrice));
     return bidPrice;
   }
@@ -103,7 +103,7 @@ public static boolean isConnected(Context mContext)
             SharedPreferences sp= PreferenceManager.getDefaultSharedPreferences(c);
             return(sp.getInt(c.getString(R.string.server_status),StockTaskService.Stock_STATUS_UNKNOWN));
         }
-  public static ContentProviderOperation buildBatchOperation(JSONObject jsonObject){
+  public static ContentProviderOperation buildBatchOperation(JSONObject jsonObject) throws NumberFormatException{
     ContentProviderOperation.Builder builder = ContentProviderOperation.newInsert(
         QuoteProvider.Quotes.CONTENT_URI);
     try {
@@ -123,6 +123,7 @@ public static boolean isConnected(Context mContext)
     } catch (JSONException e){
       e.printStackTrace();
     }
+
     return builder.build();
   }
 }

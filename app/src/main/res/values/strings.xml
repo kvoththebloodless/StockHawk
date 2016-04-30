@@ -11,6 +11,7 @@
     <string name="input_prefill"></string>
     <string name="network_toast">Uh-oh! This app requires an internet connection</string>
     <string name="server_status">stock-status</string>
+    <string name="server_invalid_input">No Stock Information available  You have provided an invalid input, please try again.</string>
     <string name="server_invalid">No Stock information available. The server is not returning valid data.\n Please check for an updated version of Sunshine.</string>
     <string name="server_down">No Stock information available. The server is not returning data.</string>
     <string name="server_unknown">No Stock information available. There seems to be an unknown problem. \n Please try restarting the app.</string>

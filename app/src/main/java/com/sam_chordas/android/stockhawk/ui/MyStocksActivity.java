@@ -228,6 +228,8 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
                 case StockTaskService.Stock_STATUS_UNKNOWN:mNoStocks.setVisibility(View.VISIBLE);
                      mNoStocks.setText(getString(R.string.server_unknown));
                     break;
+                case StockTaskService.Stock_INVALID_INPUT:mNoStocks.setVisibility(View.VISIBLE);
+                    mNoStocks.setText(getString(R.string.server_invalid_input));
 
             }
         }
