@@ -55,6 +55,7 @@ public class StockTaskService extends GcmTaskService {
     private Context mContext;
     private StringBuilder mStoredSymbols = new StringBuilder();
     private boolean isUpdate;
+    int count;
 
     public StockTaskService() {
     }
@@ -100,16 +101,21 @@ public class StockTaskService extends GcmTaskService {
                 try {
                     urlStringBuilder.append(
                             URLEncoder.encode("\"YHOO\",\"AAPL\",\"GOOG\",\"MSFT\")", "UTF-8"));
+                    /* 1)when it's initializing or simply periodic checking, if it finds that the table is empty it will first create
+                    the query according to the default stocks which are yahoo, google etc as given above in URLEncoder.encode("YH00",SDFWF,DF)
+                   */
                 } catch (UnsupportedEncodingException e) {
                     e.printStackTrace();
                 }
             } else if (initQueryCursor != null) {
-                DatabaseUtils.dumpCursor(initQueryCursor);
+                Log.i("infooooooo", DatabaseUtils.dumpCursorToString(initQueryCursor)); // simply logging the data
                 initQueryCursor.moveToFirst();
                 for (int i = 0; i < initQueryCursor.getCount(); i++) {
                     mStoredSymbols.append("\"" +
                             initQueryCursor.getString(initQueryCursor.getColumnIndex("symbol")) + "\",");
                     initQueryCursor.moveToNext();
+                    /* but if it finds that the table is not empty it will append the symbols of all the stocks which are present there since
+                    they will be those which the user has decided to keep...not necessarily yhoo google etc. (as shown in this for loop)*/
                 }
                 mStoredSymbols.replace(mStoredSymbols.length() - 1, mStoredSymbols.length(), ")");
                 try {
@@ -119,6 +125,8 @@ public class StockTaskService extends GcmTaskService {
                 }
             }
         } else if (params.getTag().equals("add")) {
+            /* function for when user clicks the floating action button that helps adding stocks
+            according to symbols entered*/
             isUpdate = false;
             // get symbol from params.getExtra and build query
             String stockInput = params.getExtras().getString("symbol");
@@ -134,7 +142,7 @@ public class StockTaskService extends GcmTaskService {
 
         String urlString;
         String getResponse;
-        int result = GcmNetworkManager.RESULT_FAILURE;
+        int result = GcmNetworkManager.RESULT_FAILURE;// initial setting to failure which can change according to how the request goes.
 
         if (urlStringBuilder != null) {
             urlString = urlStringBuilder.toString();
@@ -143,16 +151,19 @@ public class StockTaskService extends GcmTaskService {
                 result = GcmNetworkManager.RESULT_SUCCESS;
 
                 ContentValues contentValues = new ContentValues();
-                // update ISCURRENT to 0 (false) so new data is current
+                //update ISCURRENT to 0 (false) so new data is current
                 if (isUpdate) {
                     contentValues.put(QuoteColumns.ISCURRENT, 0);
+                    setLoaderStatus("off");
                     mContext.getContentResolver().update(QuoteProvider.Quotes.CONTENT_URI, contentValues,
                             null, null);
                 }
 
                 mContext.getContentResolver().applyBatch(QuoteProvider.AUTHORITY,
                         Utils.quoteJsonToContentVals(getResponse));
+                setLoaderStatus("on");
                 setStockServerStatus(Stock_STATUS_OK);
+
 
             } catch (IOException e) {
                 setStockServerStatus(Stock_STATUS_SERVER_DOWN);
@@ -174,6 +185,13 @@ public class StockTaskService extends GcmTaskService {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(mContext);
         SharedPreferences.Editor se = sp.edit();
         se.putInt(mContext.getString(R.string.server_status), stockstatus);
+        se.commit();
+    }
+
+    private void setLoaderStatus(String toggle) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(mContext);
+        SharedPreferences.Editor se = sp.edit();
+        se.putString(mContext.getString(R.string.loaders_switch), toggle);
         se.commit();
     }
 

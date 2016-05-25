@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.Loader;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.preference.PreferenceManager;
@@ -17,6 +18,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.text.InputType;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -55,6 +57,7 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
   private Context mContext;
   private Cursor mCursor;
   boolean isConnected;
+    int count;
 
   TextView mNoStocks;
     ConnectivityManager cm;
@@ -72,7 +75,7 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
     if (savedInstanceState == null){
       // Run the initialize task service so that some stocks appear upon an empty database
       mServiceIntent.putExtra("tag", "init");
-      if (isConnected){
+        if (isConnected) {
         startService(mServiceIntent);
       } else{
         networkToast();
@@ -138,7 +141,7 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
 
     mTitle = getTitle();
     if (isConnected){
-      long period = 3600L;
+        long period = 30L;
       long flex = 10L;
       String periodicTag = "periodic";
 
@@ -171,6 +174,7 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
         super.onPause();
         SharedPreferences sp= PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         sp.unregisterOnSharedPreferenceChangeListener(this);
+        getLoaderManager().destroyLoader(CURSOR_LOADER_ID);
     }
 
   public void networkToast(){
@@ -236,17 +240,22 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
 
   @Override
   public Loader<Cursor> onCreateLoader(int id, Bundle args){
+
     // This narrows the return to only the stocks that are most current.
     return new CursorLoader(this, QuoteProvider.Quotes.CONTENT_URI,
         new String[]{ QuoteColumns._ID, QuoteColumns.SYMBOL, QuoteColumns.BIDPRICE,
             QuoteColumns.PERCENT_CHANGE, QuoteColumns.CHANGE, QuoteColumns.ISUP},
-        QuoteColumns.ISCURRENT + " = ?",
-        new String[]{"1"},
+            QuoteColumns.ISCURRENT + " = 1 ",
+            null,
         null);
   }
 
   @Override
   public void onLoadFinished(Loader<Cursor> loader, Cursor data){
+
+      Log.i("recycler dataaaaaaaa", DatabaseUtils.dumpCursorToString(data));
+
+
       if(data!= null&&data.getCount()!=0)
       { mCursorAdapter.swapCursor(data);
     mCursor = data;
@@ -265,12 +274,24 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
 
   @Override
   public void onLoaderReset(Loader<Cursor> loader){
-    mCursorAdapter.swapCursor(null);
+      mCursorAdapter.swapCursor(null);
   }
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-  if(key.equals(getString(R.string.server_status)))
-      updateErrorView();
+
+        if (key.equals(getString(R.string.server_status)))
+            updateErrorView();
+
+        if (key.equals(getString(R.string.loaders_switch))) {
+            if (sharedPreferences.getString(getString(R.string.loaders_switch), "null").equals("on"))
+                getLoaderManager().restartLoader(CURSOR_LOADER_ID, null, this);
+
+
+            else
+                getLoaderManager().destroyLoader(CURSOR_LOADER_ID);
+
+        }
+
     }
 }
