@@ -49,6 +49,7 @@ public class StockTaskService extends GcmTaskService {
     public static final int Stock_INVALID_INPUT = 4;
 
 
+
     private String LOG_TAG = StockTaskService.class.getSimpleName();
 
     private OkHttpClient client = new OkHttpClient();
@@ -78,6 +79,8 @@ public class StockTaskService extends GcmTaskService {
 
     @Override
     public int onRunTask(TaskParams params) {
+
+
         Cursor initQueryCursor;
         if (mContext == null) {
             mContext = this;
@@ -167,13 +170,17 @@ public class StockTaskService extends GcmTaskService {
 
             } catch (IOException e) {
                 setStockServerStatus(Stock_STATUS_SERVER_DOWN);
+
             } catch (JSONException e) {
                 setStockServerStatus(Stock_STATUS_SERVER_INVALID);
 
+
             } catch (RemoteException | OperationApplicationException e) {
                 Log.e(LOG_TAG, "Error applying batch insert", e);
+
             } catch (NumberFormatException e) {
                setStockServerStatus(Stock_INVALID_INPUT);
+                result = GcmNetworkManager.RESULT_FAILURE;
             }
 
 

@@ -1,0 +1,29 @@
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+
+
+    <string name="action_example">"العمل سبيل المثال"</string>
+    <string name="action_settings">"إعدادات"</string>
+    <string name="action_change_units">"وحدات وحدات"</string>
+    <string name="symbol_search">"البحث عن الرمز"</string>
+    <string name="content_test">"الأسهم البحث"</string>
+    <string name="input_hint">"أدخل رمز السهم هنا"</string>
+    <string name="input_prefill">""</string>
+    <string name="dollarrep">"تحويل إلى تمثيل الدولار"</string>
+    <string name="percentrep">"تحويل إلى التمثيل في المئة"</string>
+    <string name="network_toast">"أنت غير متصل بالإنترنت. هذا التطبيق يتطلب اتصال بالإنترنت."</string>
+    <string name="preexistingstock">"هذا السجل هو موجود بالفعل."</string>
+    <string name="server_invalid_input">"لا توجد معلومات المالية المتاحة لقد أتاح إدخال غير صالح، يرجى المحاولة مرة أخرى."</string>
+    <string name="server_invalid">"لا معلومات الأوراق المالية المتاحة. الملقم لا تعود بيانات صالح فضلا تحقق من وجود نسخة محدثة من الأسهم هوك."</string>
+    <string name="server_down">"لا معلومات الأوراق المالية المتاحة. الملقم لا يعودون البيانات."</string>
+    <string name="server_unknown">"لا معلومات الأوراق المالية المتاحة. ويبدو أن هناك مشكلة غير معروفة.  الرجاء حاول إعادة تشغيل التطبيق."</string>
+    <string name="internet_off">"لا توجد معلومات المالية لعرضه. لا يبدو أن تكون متصلا بالإنترنت."</string>
+    <string name="empty_db_msg">"لا توجد معلومات المالية لعرض!"</string>
+    <string name="toast_stock_removed">"السهم إزالتها هو:"</string>
+    <string name="toast_select_stock2_delete">"حدد الأوراق المالية لحذف"</string>
+    <string name="stock_is">"الأسهم"</string>
+    <string name="bid_price_is"> <xliff:g>%1$s</xliff:g> سعر العرض هو</string>
+    <string name="is_up_by">"زيادة"</string>
+    <string name="is_down_by">"وبانخفاض قدره"</string>
+    <string name="total_content_description"> <xliff:g>%1$s %2$s %3$s</xliff:g> السهم </string>
+
+</resources>

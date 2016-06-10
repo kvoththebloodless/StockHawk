@@ -1,5 +1,5 @@
-<resources>
-    <string name="app_name">Stock Hawk</string>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" translatable="false">Stock Hawk</string>
 
     <string name="action_example">Example action</string>
 
@@ -7,13 +7,26 @@
     <string name="action_change_units">Change Units</string>
     <string name="symbol_search">Symbol Search</string>
     <string name="content_test">Search for a Stock Symbol</string>
-    <string name="input_hint">FB</string>
+    <string name="input_hint">Enter the stock symbol here</string>
     <string name="input_prefill"></string>
-    <string name="network_toast">Uh-oh! This app requires an internet connection</string>
-    <string name="server_status">stock-status</string>
-    <string name="loaders_switch">gobble</string>
+    <string name="dollarrep">converting to dollar representation</string>
+    <string name="percentrep">converting to percent representation</string>
+    <string name="network_toast">You are not connected to the internet. This app requires an internet connection.</string>
+    <string name="server_status" translatable="false">stock-status</string>
+    <string name="preexistingstock">This stock is already saved</string>
+    <string name="loaders_switch" translatable="false">gobble</string>
     <string name="server_invalid_input">No Stock Information available  You have provided an invalid input, please try again.</string>
-    <string name="server_invalid">No Stock information available. The server is not returning valid data.\n Please check for an updated version of Sunshine.</string>
+    <string name="server_invalid">No Stock information available. The server is not returning valid data.\n Please check for an updated version of Stockhawk.</string>
     <string name="server_down">No Stock information available. The server is not returning data.</string>
     <string name="server_unknown">No Stock information available. There seems to be an unknown problem. \n Please try restarting the app.</string>
+    <string name="internet_off">No Stock Information to display. You do not seem to be connected to the internet.</string>
+    <string name="empty_db_msg">No Stock Information to display!</string>
+    <string name="toast_stock_removed">The stock removed is :</string>
+    <string name="toast_select_stock2_delete">Select the stock to delete</string>
+    <string name="stock_is">The stock is</string>
+    <string name="bid_price_is"> The bid price is <xliff:g>%1$s</xliff:g> </string>
+    <string name="is_up_by">Is up by</string>
+    <string name="is_down_by">Is down by</string>
+    <string name="total_content_description">The stock <xliff:g>%1$s %2$s %3$s</xliff:g> </string>
+
 </resources>

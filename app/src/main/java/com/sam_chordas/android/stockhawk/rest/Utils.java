@@ -6,7 +6,9 @@ import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.preference.PreferenceManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.sam_chordas.android.stockhawk.R;
 import com.sam_chordas.android.stockhawk.data.QuoteColumns;
@@ -27,6 +29,7 @@ public class Utils {
   private static String LOG_TAG = Utils.class.getSimpleName();
 
   public static boolean showPercent = true;
+    public static boolean deleteStock = false;
 
   public static ArrayList quoteJsonToContentVals(String JSON) throws JSONException,IOException{
     ArrayList<ContentProviderOperation> batchOperations = new ArrayList<>();
@@ -86,9 +89,11 @@ public class Utils {
     change = changeBuffer.toString();
     return change;
   }
+
 public static boolean isConnected(Context mContext)
   {
-     ConnectivityManager cm =(ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+      Log.e("not nullllllllllllllll", mContext.getString(R.string.internet_off));
+      ConnectivityManager cm = (ConnectivityManager) (mContext.getSystemService(Context.CONNECTIVITY_SERVICE));
 
       NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
      boolean isconnected = activeNetwork != null &&
@@ -119,7 +124,7 @@ public static boolean isConnected(Context mContext)
       }else{
         builder.withValue(QuoteColumns.ISUP, 1);
       }
-
+        builder.withValue(QuoteColumns.NAME, jsonObject.getString("Name"));
     } catch (JSONException e){
       e.printStackTrace();
     }
