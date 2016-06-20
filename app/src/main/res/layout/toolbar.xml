@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+                                    xmlns:app="http://schemas.android.com/apk/res-auto"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    app:cardCornerRadius="7dp"
+                                    app:cardElevation="10dp"
+                                    app:cardUseCompatPadding="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <android.support.v7.widget.Toolbar
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/tooly"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/primary"
+            android:paddingEnd="5dp"
+            android:paddingLeft="5dp"
+
+            android:paddingRight="5dp"
+            android:paddingStart="5dp"
+            app:contentInsetLeft="0dp"
+            app:contentInsetStart="0dp"
+
+
+            />
+
+
+        <LinearLayout
+
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/primary"
+            android:orientation="horizontal"
+            android:paddingBottom="5dp"
+            android:paddingEnd="30dp"
+            android:paddingLeft="30dp"
+            android:paddingRight="30dp"
+            android:paddingStart="30dp"
+            android:paddingTop="5dp"
+
+            >
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:gravity="start|left"
+                android:text="@string/quote"
+                android:textColor="@color/icons"
+                android:textSize="@dimen/md_listitem_textsize"
+
+                />
+
+            <include layout="@layout/divider_vertical"/>
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="@string/bid"
+                android:textColor="@color/icons"
+                android:textSize="@dimen/md_listitem_textsize"
+                />
+
+            <include layout="@layout/divider_vertical"/>
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:gravity="right|end"
+                android:text="@string/change"
+
+                android:textColor="@color/icons"
+                android:textSize="@dimen/md_listitem_textsize"
+                />
+
+        </LinearLayout>
+    </LinearLayout>
+</android.support.v7.widget.CardView>

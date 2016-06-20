@@ -1,6 +1,6 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
 
-
+    <!--TRANSLATED STRINGS IN ARABIC USING https://translate.google.com/toolkit/list?vid=&hl=en#translations/active -->
     <string name="action_example">"العمل سبيل المثال"</string>
     <string name="action_settings">"إعدادات"</string>
     <string name="action_change_units">"وحدات وحدات"</string>
@@ -25,5 +25,28 @@
     <string name="is_up_by">"زيادة"</string>
     <string name="is_down_by">"وبانخفاض قدره"</string>
     <string name="total_content_description"> <xliff:g>%1$s %2$s %3$s</xliff:g> السهم </string>
+    <string name="refresh">تحديث الأسهم</string>
+    <string name="ok">حسنا</string>
+    <string name="empty_view_text">يوجد مخزون</string>
+    <string name="empty_graph"> لا تتوافر بيانات</string>
+    <string name="return_button_content">عودة إلى القائمة السابقة من الأسهم</string>
+    <string name="toast_offline_Stocks">"عرض الأسهم حاليا، إذا كان هناك أي"</string>
+    <string name="notification_network">"تغيير شبكة"</string>
+    <string name="connectivity_gained">"استعاد الربط تحديث الأسهم"</string>
+    <string name="connectivity_lost">"الأسهم الاتصال فقدت لا يمكن تحديث"</string>
+    <string name="msg_downloading_data">"تحميل البيانات:"</string>
+    <string name="msg_wait">"عقد على ثانية."</string>
+    <string name="stock_name">"اسم السهم"</string>
+    <string name="volume">"حجم جهارة الصوت"</string>
+    <string name="highlow">"H / L"</string>
+    <string name="date">"التاريخ"</string>
+    <string name="close">"إغلاق"</string>
+    <string name="stock_meta">"عرض عام واحد من البيانات"</string>
+    <string name="add_new_stock">"إضافة اقتباس المالية الجديد"</string>
+    <string name="returnback">"الاقرار رقم 1"</string>
+    <string name="change">"تغيير"</string>
+    <string name="bid">"عرض "</string>
+    <string name="quote">"اقتباس"</string>
+    <string name="no_offline_Stocks">يوجد مخزون حاليا</string>
 
 </resources>

@@ -6,30 +6,29 @@ import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.preference.PreferenceManager;
-import android.support.v7.widget.RecyclerView;
-import android.util.Log;
-import android.widget.Toast;
 
 import com.sam_chordas.android.stockhawk.R;
 import com.sam_chordas.android.stockhawk.data.QuoteColumns;
 import com.sam_chordas.android.stockhawk.data.QuoteProvider;
 import com.sam_chordas.android.stockhawk.service.StockTaskService;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * Created by sam_chordas on 10/8/15.
  */
 public class Utils {
 
-  private static String LOG_TAG = Utils.class.getSimpleName();
-
+    public static final int CURSOR_LOADER_ID = 0;
+    public static int Notificationid = 1001;
   public static boolean showPercent = true;
     public static boolean deleteStock = false;
+    private static String LOG_TAG = Utils.class.getSimpleName();
 
   public static ArrayList quoteJsonToContentVals(String JSON) throws JSONException,IOException{
     ArrayList<ContentProviderOperation> batchOperations = new ArrayList<>();
@@ -92,7 +91,7 @@ public class Utils {
 
 public static boolean isConnected(Context mContext)
   {
-      Log.e("not nullllllllllllllll", mContext.getString(R.string.internet_off));
+
       ConnectivityManager cm = (ConnectivityManager) (mContext.getSystemService(Context.CONNECTIVITY_SERVICE));
 
       NetworkInfo activeNetwork = cm.getActiveNetworkInfo();

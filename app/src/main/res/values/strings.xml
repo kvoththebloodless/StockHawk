@@ -11,7 +11,7 @@
     <string name="input_prefill"></string>
     <string name="dollarrep">converting to dollar representation</string>
     <string name="percentrep">converting to percent representation</string>
-    <string name="network_toast">You are not connected to the internet. This app requires an internet connection.</string>
+    <string name="network_toast">You are not connected to the internet. This feature requires an internet connection.</string>
     <string name="server_status" translatable="false">stock-status</string>
     <string name="preexistingstock">This stock is already saved</string>
     <string name="loaders_switch" translatable="false">gobble</string>
@@ -28,5 +28,33 @@
     <string name="is_up_by">Is up by</string>
     <string name="is_down_by">Is down by</string>
     <string name="total_content_description">The stock <xliff:g>%1$s %2$s %3$s</xliff:g> </string>
+
+
+    <string name="refresh">Refresh</string>
+    <string name="ok">ok</string>
+    <string name="empty_view_text">No Stocks to display</string>
+    <string name="empty_graph"> No data available</string>
+    <string name="return_button_content">return to the previous list of stocks</string>
+
+    <string name="toast_offline_Stocks">Displaying offline stocks, if there are any</string>
+    <string name="notification_network">"Network change"</string>
+    <string name="connectivity_gained">Connectivity regained updating stocks</string>
+    <string name="connectivity_lost">Connectivity lost stocks cannot update</string>
+    <string name="msg_downloading_data">Downloading data</string>
+    <string name="msg_wait">Hold on a sec</string>
+
+    <string name="stock_name">stock name</string>
+    <string name="volume">volume</string>
+    <string name="highlow">H/L</string>
+    <string name="date">Date</string>
+    <string name="close">close</string>
+    <string name="stock_meta">Showing one year of data</string>
+    <string name="add_new_stock">Add a new Stock quote</string>
+    <string name="returnback">Return</string>
+    <string name="change">Change</string>
+    <string name="bid">bid </string>
+    <string name="quote">Quote</string>
+    <string name="no_offline_Stocks">No offline stocks</string>
+
 
 </resources>

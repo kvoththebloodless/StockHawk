@@ -5,12 +5,9 @@ import android.content.Context;
 import android.content.OperationApplicationException;
 import android.content.SharedPreferences;
 import android.database.Cursor;
-import android.database.DatabaseUtils;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.support.annotation.IntDef;
-import android.util.Log;
-import android.widget.Toast;
 
 import com.google.android.gms.gcm.GcmNetworkManager;
 import com.google.android.gms.gcm.GcmTaskService;
@@ -37,29 +34,19 @@ import java.net.URLEncoder;
  * and is used for the initialization and adding task as well.
  */
 public class StockTaskService extends GcmTaskService {
-    @IntDef({Stock_STATUS_OK, Stock_STATUS_SERVER_DOWN, Stock_STATUS_SERVER_INVALID, Stock_STATUS_UNKNOWN, Stock_INVALID_INPUT})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface ServerStatus {
-    }
-
     public static final int Stock_STATUS_OK = 0;
     public static final int Stock_STATUS_SERVER_DOWN = 1;
     public static final int Stock_STATUS_SERVER_INVALID = 2;
     public static final int Stock_STATUS_UNKNOWN = 3;
     public static final int Stock_INVALID_INPUT = 4;
-
-
-
     private String LOG_TAG = StockTaskService.class.getSimpleName();
-
     private OkHttpClient client = new OkHttpClient();
     private Context mContext;
     private StringBuilder mStoredSymbols = new StringBuilder();
     private boolean isUpdate;
-    int count;
-
     public StockTaskService() {
     }
+
 
     public StockTaskService(Context context) {
         mContext = context;
@@ -94,7 +81,7 @@ public class StockTaskService extends GcmTaskService {
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
-        if (params.getTag().equals("init") || params.getTag().equals("periodic")) {
+        if (params.getTag().equals("init") || params.getTag().equals("periodic") || params.getTag().equals("refresh")) {
             isUpdate = true;
             initQueryCursor = mContext.getContentResolver().query(QuoteProvider.Quotes.CONTENT_URI,
                     new String[]{"Distinct " + QuoteColumns.SYMBOL}, null,
@@ -111,7 +98,7 @@ public class StockTaskService extends GcmTaskService {
                     e.printStackTrace();
                 }
             } else if (initQueryCursor != null) {
-                Log.i("infooooooo", DatabaseUtils.dumpCursorToString(initQueryCursor)); // simply logging the data
+
                 initQueryCursor.moveToFirst();
                 for (int i = 0; i < initQueryCursor.getCount(); i++) {
                     mStoredSymbols.append("\"" +
@@ -157,6 +144,9 @@ public class StockTaskService extends GcmTaskService {
                 //update ISCURRENT to 0 (false) so new data is current
                 if (isUpdate) {
                     contentValues.put(QuoteColumns.ISCURRENT, 0);
+                    /*SETTING THE CURSOR LOADER ON AND OFF WAS REQUIRED HERE SINCE OTHERWISE THE SCREEN USED TO FLICKER
+                    * WHILE SETTING OF THE DATA, DISPLAYING THE ERROR MESSAGE BEHIND IT, THE REASON WAS THAT AS SOON AS UPDATE
+                    * WAS MADE THE ONLoadFinished() GOT A NULL RESPONSE*/
                     setLoaderStatus("off");
                     mContext.getContentResolver().update(QuoteProvider.Quotes.CONTENT_URI, contentValues,
                             null, null);
@@ -165,21 +155,25 @@ public class StockTaskService extends GcmTaskService {
                 mContext.getContentResolver().applyBatch(QuoteProvider.AUTHORITY,
                         Utils.quoteJsonToContentVals(getResponse));
                 setLoaderStatus("on");
+
+                /*G:The annotations come in use here*/
                 setStockServerStatus(Stock_STATUS_OK);
 
 
             } catch (IOException e) {
                 setStockServerStatus(Stock_STATUS_SERVER_DOWN);
+                result = GcmNetworkManager.RESULT_FAILURE;
 
             } catch (JSONException e) {
                 setStockServerStatus(Stock_STATUS_SERVER_INVALID);
+                result = GcmNetworkManager.RESULT_FAILURE;
 
 
             } catch (RemoteException | OperationApplicationException e) {
-                Log.e(LOG_TAG, "Error applying batch insert", e);
+
 
             } catch (NumberFormatException e) {
-               setStockServerStatus(Stock_INVALID_INPUT);
+                setStockServerStatus(Stock_INVALID_INPUT);
                 result = GcmNetworkManager.RESULT_FAILURE;
             }
 
@@ -200,6 +194,12 @@ public class StockTaskService extends GcmTaskService {
         SharedPreferences.Editor se = sp.edit();
         se.putString(mContext.getString(R.string.loaders_switch), toggle);
         se.commit();
+    }
+
+    /*ANOOTATIONS FOR HANDLING SERVER BASED ERRORS*/
+    @IntDef({Stock_STATUS_OK, Stock_STATUS_SERVER_DOWN, Stock_STATUS_SERVER_INVALID, Stock_STATUS_UNKNOWN, Stock_INVALID_INPUT})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ServerStatus {
     }
 
 }

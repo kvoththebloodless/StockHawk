@@ -4,7 +4,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.Typeface;
-import android.os.Build;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -46,30 +45,23 @@ public class QuoteCursorAdapter extends CursorRecyclerViewAdapter<QuoteCursorAda
 
     @Override
     public void onBindViewHolder(final ViewHolder viewHolder, final Cursor cursor) {
-        String mChange = "undetermined";
+        String mChange;
+
+        viewHolder.name = cursor.getString(cursor.getColumnIndex("name"));
+        viewHolder.quote = cursor.getString(cursor.getColumnIndex("symbol"));
         viewHolder.symbol.setText(cursor.getString(cursor.getColumnIndex("symbol")));
         viewHolder.symbol.setContentDescription(mContext.getString(R.string.stock_is) + cursor.getString(cursor.getColumnIndex("name")));
         viewHolder.bidPrice.setText(cursor.getString(cursor.getColumnIndex("bid_price")));
         viewHolder.bidPrice.setContentDescription(mContext.getString(R.string.bid_price_is, cursor.getString(cursor.getColumnIndex("bid_price"))));
-        int sdk = Build.VERSION.SDK_INT;
+
         if (cursor.getInt(cursor.getColumnIndex("is_up")) == 1) {
             mChange = mContext.getString(R.string.is_up_by);
-            if (sdk < Build.VERSION_CODES.JELLY_BEAN) {
-                viewHolder.change.setBackgroundDrawable(
-                        mContext.getResources().getDrawable(R.drawable.percent_change_pill_green));
-            } else {
-                viewHolder.change.setBackground(
-                        mContext.getResources().getDrawable(R.drawable.percent_change_pill_green));
-            }
+
+            viewHolder.change.setBackgroundResource(R.drawable.percent_change_pill_green);
+
         } else {
             mChange = mContext.getString(R.string.is_down_by);
-            if (sdk < Build.VERSION_CODES.JELLY_BEAN) {
-                viewHolder.change.setBackgroundDrawable(
-                        mContext.getResources().getDrawable(R.drawable.percent_change_pill_red));
-            } else {
-                viewHolder.change.setBackground(
-                        mContext.getResources().getDrawable(R.drawable.percent_change_pill_red));
-            }
+            viewHolder.change.setBackgroundResource(R.drawable.percent_change_pill_red);
         }
         if (Utils.showPercent) {
             viewHolder.change.setText(cursor.getString(cursor.getColumnIndex("percent_change")));
@@ -100,6 +92,7 @@ public class QuoteCursorAdapter extends CursorRecyclerViewAdapter<QuoteCursorAda
         public final TextView symbol;
         public final TextView bidPrice;
         public final TextView change;
+        public String name, quote; //NEED THIS FOR PARSING THE VALUES TO THE 'StockGraphActivity'
 
         public ViewHolder(View itemView) {
 

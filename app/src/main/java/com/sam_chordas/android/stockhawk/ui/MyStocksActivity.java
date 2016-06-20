@@ -1,93 +1,94 @@
 package com.sam_chordas.android.stockhawk.ui;
 
 import android.app.LoaderManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.Loader;
 import android.content.SharedPreferences;
-import android.content.res.ColorStateList;
 import android.database.Cursor;
-import android.database.DatabaseUtils;
-import android.graphics.Color;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.app.ActionBar;
-import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.text.InputType;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.google.android.gms.gcm.GcmNetworkManager;
+import com.google.android.gms.gcm.PeriodicTask;
+import com.google.android.gms.gcm.Task;
+import com.melnykov.fab.FloatingActionButton;
 import com.sam_chordas.android.stockhawk.R;
 import com.sam_chordas.android.stockhawk.data.QuoteColumns;
 import com.sam_chordas.android.stockhawk.data.QuoteProvider;
+import com.sam_chordas.android.stockhawk.receivers.ConnectionChange;
 import com.sam_chordas.android.stockhawk.rest.QuoteCursorAdapter;
 import com.sam_chordas.android.stockhawk.rest.RecyclerViewItemClickListener;
 import com.sam_chordas.android.stockhawk.rest.Utils;
 import com.sam_chordas.android.stockhawk.service.StockIntentService;
 import com.sam_chordas.android.stockhawk.service.StockTaskService;
-import com.google.android.gms.gcm.GcmNetworkManager;
-import com.google.android.gms.gcm.PeriodicTask;
-import com.google.android.gms.gcm.Task;
-import com.melnykov.fab.FloatingActionButton;
 import com.sam_chordas.android.stockhawk.touch_helper.SimpleItemTouchHelperCallback;
-import com.squareup.okhttp.internal.Util;
+
 
 public class MyStocksActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor>, SharedPreferences.OnSharedPreferenceChangeListener {
 
+    boolean isConnected;
+    RecyclerView recyclerView;
+    TextView mNoStocks;
+    Toolbar toolbar;
+    RelativeLayout cont;
+    BroadcastReceiver receiver;
+    LinearLayout mainview;
+    Button prestocks;
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
      */
 
-    /**
-     * Used to store the last screen title. For use in {@link #restoreActionBar()}.
-     */
+
     private CharSequence mTitle;
     private Intent mServiceIntent;
     private ItemTouchHelper mItemTouchHelper;
-    private static final int CURSOR_LOADER_ID = 0;
     private QuoteCursorAdapter mCursorAdapter;
     private Context mContext;
-    private Cursor mCursor;
-    boolean isConnected;
-    int count;
-    RecyclerView recyclerView;
-    TextView mNoStocks;
-    ConnectivityManager cm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         mContext = this;
+
         isConnected = Utils.isConnected(getApplicationContext());
         setContentView(R.layout.activity_my_stocks);
+        mainview = (LinearLayout) findViewById(R.id.mainview);
+        toolbar = (Toolbar) findViewById(R.id.tooly);
+        cont = (RelativeLayout) findViewById(R.id.hiddenpage);
+        prestocks = (Button) findViewById(R.id.prestocks);
+
+        setSupportActionBar(toolbar);
+
+
         mNoStocks = (TextView) findViewById(R.id.nostocks);
         // The intent service is for executing immediate pulls from the Yahoo API
         // GCMTaskService can only schedule tasks, they cannot execute immediately
         mServiceIntent = new Intent(this, StockIntentService.class);
-        if (savedInstanceState == null) {
-            // Run the initialize task service so that some stocks appear upon an empty database
-            mServiceIntent.putExtra("tag", "init");
-            if (isConnected) {
-                startService(mServiceIntent);
-            } else {
-                networkToast();
-            }
-        }
+
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        getLoaderManager().initLoader(CURSOR_LOADER_ID, null, this);
+        getLoaderManager().initLoader(Utils.CURSOR_LOADER_ID, null, this);
 
         mCursorAdapter = new QuoteCursorAdapter(this, null);
         recyclerView.addOnItemTouchListener(new RecyclerViewItemClickListener(this,
@@ -95,16 +96,36 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
                     @Override
                     public void onItemClick(View v, int position) {
                         String symbol = ((TextView) (v.findViewById(R.id.stock_symbol))).getText().toString();
-                        if (Utils.deleteStock) {
+                        if (Utils.deleteStock) {/*LOGIC FOR THE TOOLBAR DELETE BUTTON*/
                             mContext.getContentResolver().delete(QuoteProvider.Quotes.CONTENT_URI, QuoteColumns.SYMBOL + " = '" + symbol
                                     + "'", null);
                             Utils.deleteStock = false;
                             recyclerView.setFocusable(false);
                             Toast.makeText(getApplicationContext(), getString(R.string.toast_stock_removed) + symbol, Toast.LENGTH_SHORT).show();
+                        } else {
+                            Intent in = new Intent(getApplicationContext(), StockGraphActivity.class);
+                            in.putExtra("Stockname", ((QuoteCursorAdapter.ViewHolder) recyclerView.getChildViewHolder(v)).name); //required for the next activity
+                            in.putExtra("Quote", ((QuoteCursorAdapter.ViewHolder) recyclerView.getChildViewHolder(v)).quote);
+
+                            startActivity(in);
                         }
                     }
                 }));
         recyclerView.setAdapter(mCursorAdapter);
+        /*THE BUTTON WHICH RETURNS BACK THE LOCAL DATA AFTER THE ERROR MESSAGES ARE DISPLAYED*/
+        prestocks.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Cursor c = callContent();
+                if (c != null && c.getCount() != 0) {
+                    cont.setVisibility(View.GONE);
+                    mCursorAdapter.swapCursor(callContent());
+
+                } else {
+                    Toast.makeText(getApplicationContext(), R.string.no_offline_Stocks, Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
 
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -121,6 +142,14 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
                                 public void onInput(MaterialDialog dialog, CharSequence input) {
                                     // On FAB click, receive user input. Make sure the stock doesn't already exist
                                     // in the DB and proceed accordingly
+                                    if (input.toString().trim().equals("")) {/*IF THIS EMPTY INPUT CONDITION IS NOT HANDLED THEN THE ERROR MESSAGE SET IS THE SERVER_INVALID
+                                         INSTEAD OF INPUT_INVALID*/
+                                        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                                        SharedPreferences.Editor se = sp.edit();
+                                        se.putInt(mContext.getString(R.string.server_status), StockTaskService.Stock_INVALID_INPUT);
+                                        se.apply();
+                                        return;
+                                    }
 
                                     Cursor c = getContentResolver().query(QuoteProvider.Quotes.CONTENT_URI,
                                             new String[]{QuoteColumns.SYMBOL}, QuoteColumns.SYMBOL + "= ?",
@@ -131,7 +160,7 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
                                                         Toast.LENGTH_LONG);
                                         toast.setGravity(Gravity.CENTER, Gravity.CENTER, 0);
                                         toast.show();
-                                        return;
+
                                     } else {
                                         // Add the stock to DB
                                         mServiceIntent.putExtra("tag", "add");
@@ -156,7 +185,7 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
 
         mTitle = getTitle();
         if (isConnected) {
-            long period = 30L;
+            long period = 36000L;
             long flex = 10L;
             String periodicTag = "periodic";
 
@@ -182,7 +211,11 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
         super.onResume();
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         sp.registerOnSharedPreferenceChangeListener(this);
-        getLoaderManager().restartLoader(CURSOR_LOADER_ID, null, this);
+        getLoaderManager().restartLoader(Utils.CURSOR_LOADER_ID, null, this);
+        /*REGISTERING THE RECEIVER FOR THE CONNECTIVITY CHANGE BROADCAST*/
+        IntentFilter filter = new IntentFilter("android.net.conn.CONNECTIVITY_CHANGE");
+        receiver = new ConnectionChange();
+        registerReceiver(receiver, filter);
     }
 
     @Override
@@ -190,7 +223,9 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
         super.onPause();
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         sp.unregisterOnSharedPreferenceChangeListener(this);
-        getLoaderManager().destroyLoader(CURSOR_LOADER_ID);
+        getLoaderManager().destroyLoader(Utils.CURSOR_LOADER_ID);
+        /*UNREGISTERING THE CONNECTIVITY CHANGE BROADCAST*/
+        unregisterReceiver(receiver);
     }
 
     public void networkToast() {
@@ -198,17 +233,10 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
     }
 
 
-    public void restoreActionBar() {
-        ActionBar actionBar = getSupportActionBar();
-        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
-        actionBar.setDisplayShowTitleEnabled(true);
-        actionBar.setTitle(mTitle);
-    }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.my_stocks, menu);
-        restoreActionBar();
+
         return true;
     }
 
@@ -227,11 +255,14 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
             Utils.deleteStock = true;
             Toast.makeText(getApplicationContext(), getString(R.string.toast_select_stock2_delete), Toast.LENGTH_SHORT).show();
         }
+        if (id == R.id.menu_refresh) {
+            refresh();
+        }
         if (id == R.id.action_change_units) {
             // this is for changing stock changes from percent value to dollar value
             if (Utils.showPercent) {
                 item.setTitle(getString(R.string.percentrep));
-                item.setIcon(R.drawable.percent);
+                item.setIcon(R.drawable.ic_percent_white_24dp);
 
             } else {
                 item.setTitle(getString(R.string.dollarrep));
@@ -244,35 +275,50 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
         return super.onOptionsItemSelected(item);
     }
 
+    private void refresh() {
+        if (Utils.isConnected(getApplicationContext())) {
+
+            mServiceIntent.putExtra("tag", "refresh");
+            startService(mServiceIntent);
+        } else {
+            Toast.makeText(getApplicationContext(), getString(R.string.internet_off), Toast.LENGTH_LONG).show();
+        }
+    }
+
     public void updateErrorView() {
+        /*THE ERROR CODES AND THEIR HANDLING*/
+
         switch (Utils.getServerStatus(getApplicationContext())) {
             case StockTaskService.Stock_STATUS_SERVER_DOWN:
                 mNoStocks.setText(getString(R.string.server_down));
-                mNoStocks.setVisibility(View.VISIBLE);
+                cont.setVisibility(View.VISIBLE);
                 break;
             case StockTaskService.Stock_STATUS_SERVER_INVALID:
                 mNoStocks.setText(getString(R.string.server_invalid));
-                mNoStocks.setVisibility(View.VISIBLE);
+                cont.setVisibility(View.VISIBLE);
                 break;
             case StockTaskService.Stock_STATUS_OK:
-                mNoStocks.setVisibility(View.GONE);
+                cont.setVisibility(View.GONE);
                 break;
             case StockTaskService.Stock_STATUS_UNKNOWN:
-                mNoStocks.setVisibility(View.VISIBLE);
+                cont.setVisibility(View.VISIBLE);
                 mNoStocks.setText(getString(R.string.server_unknown));
                 break;
             case StockTaskService.Stock_INVALID_INPUT:
-                mNoStocks.setVisibility(View.VISIBLE);
+                cont.setVisibility(View.VISIBLE);
                 mNoStocks.setText(getString(R.string.server_invalid_input));
                 break;
 
 
             default:
-                mNoStocks.setVisibility(View.VISIBLE);
+                cont.setVisibility(View.VISIBLE);
                 mNoStocks.setText(getString(R.string.empty_db_msg));
 
         }
+
+        resetSharedPref();
     }
+
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
@@ -288,14 +334,10 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-
-        Log.i("recycler dataaaaaaaa", DatabaseUtils.dumpCursorToString(data));
-
-
         if (data != null && data.getCount() != 0) {
             mCursorAdapter.swapCursor(data);
-            mCursor = data;
-            mNoStocks.setVisibility(View.GONE);
+
+            cont.setVisibility(View.GONE);
         } else {
 
             if (!Utils.isConnected(getApplicationContext()))
@@ -305,7 +347,7 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
                 if (Utils.getServerStatus(getApplicationContext()) != StockTaskService.Stock_STATUS_OK)
                     updateErrorView();
             }
-            mNoStocks.setVisibility(View.VISIBLE);
+            cont.setVisibility(View.VISIBLE);
 
         }
     }
@@ -313,6 +355,25 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
         mCursorAdapter.swapCursor(null);
+    }
+
+    private void resetSharedPref() {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        sp.unregisterOnSharedPreferenceChangeListener(this);
+        SharedPreferences.Editor se = sp.edit();
+        se.putInt(mContext.getString(R.string.server_status), StockTaskService.Stock_STATUS_OK);
+        se.apply();
+        sp.registerOnSharedPreferenceChangeListener(this);
+
+    }
+
+    public Cursor callContent() {/*USED BY THE RETURN BUTTON*/
+        return getContentResolver().query(QuoteProvider.Quotes.CONTENT_URI,
+                new String[]{QuoteColumns._ID, QuoteColumns.SYMBOL, QuoteColumns.BIDPRICE,
+                        QuoteColumns.PERCENT_CHANGE, QuoteColumns.CHANGE, QuoteColumns.ISUP, QuoteColumns.NAME},
+                QuoteColumns.ISCURRENT + " = 1 ",
+                null,
+                null);
     }
 
     @Override
@@ -323,11 +384,11 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
 
         if (key.equals(getString(R.string.loaders_switch))) {
             if (sharedPreferences.getString(getString(R.string.loaders_switch), "null").equals("on"))
-                getLoaderManager().restartLoader(CURSOR_LOADER_ID, null, this);
+                getLoaderManager().restartLoader(Utils.CURSOR_LOADER_ID, null, this);
 
 
             else
-                getLoaderManager().destroyLoader(CURSOR_LOADER_ID);
+                getLoaderManager().destroyLoader(Utils.CURSOR_LOADER_ID);
 
         }
 
