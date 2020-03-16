@@ -21,6 +21,7 @@ import com.sam_chordas.android.stockhawk.touch_helper.ItemTouchHelperViewHolder;
  * Credit to skyfishjy gist:
  * https://gist.github.com/skyfishjy/443b7448f59be978bc59
  * for the code structure
+ * Modified by Gourav Acharya
  */
 public class QuoteCursorAdapter extends CursorRecyclerViewAdapter<QuoteCursorAdapter.ViewHolder>
         implements ItemTouchHelperAdapter {
